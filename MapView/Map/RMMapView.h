@@ -200,6 +200,9 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 /** The current zoom level of the map. */
 @property (nonatomic, assign) float zoom;
 
+/** A Boolean value denoting if the map is zooming (either programmatically ob by double tap / two finger tap) */
+@property (nonatomic, readonly) BOOL mapScrollViewIsZooming;
+
 /** The minimum zoom level of the map, clamped to the range supported by the tile source(s). */
 @property (nonatomic, assign) float minZoom;
 

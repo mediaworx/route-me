@@ -157,7 +157,6 @@
     float _zoom, _lastZoom;
     CGPoint _lastContentOffset, _accumulatedDelta;
     CGSize _lastContentSize;
-    BOOL _mapScrollViewIsZooming;
 
     BOOL _enableDragging, _enableBouncing;
 
@@ -189,6 +188,7 @@
 @synthesize zoomingInPivotsAroundCenter = _zoomingInPivotsAroundCenter;
 @synthesize minZoom = _minZoom, maxZoom = _maxZoom;
 @synthesize screenScale = _screenScale;
+@synthesize mapScrollViewIsZooming = _mapScrollViewIsZooming;
 @synthesize tileCache = _tileCache;
 @synthesize quadTree = _quadTree;
 @synthesize enableClustering = _enableClustering;
