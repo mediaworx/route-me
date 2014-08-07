@@ -130,8 +130,6 @@ typedef NS_ENUM(NSUInteger, RMUserTrackingMode) {
 *   @param map The map view. */
 - (void)doubleTapOnAnnotation:(RMAnnotation *)annotation at:(CGPoint)point onMap:(RMMapView *)map;
 
-- (void)
-
 /** Tells the delegate when the user taps the label for an annotation.
 *   @param annotation The annotation whose label was was tapped.
 *   @param map The map view. */
