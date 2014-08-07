@@ -320,8 +320,7 @@
     NSLog(@"Clicked on Map - Location: x:%lf y:%lf, Projected east:%f north:%f, Coordinate lat:%f lon:%f", point.x, point.y, projectedPoint.x, projectedPoint.y, coordinates.latitude, coordinates.longitude);
 }
 
-- (void)tapOnAnnotation:(RMAnnotation *)annotation onMap:(RMMapView *)map
-{
+- (void)tapOnAnnotation:(RMAnnotation *)annotation at:(CGPoint)point onMap:(RMMapView *)map {
     if ([annotation.annotationType isEqualToString:kRMClusterAnnotationTypeName])
     {
         [map zoomInToNextNativeZoomAt:[map coordinateToPixel:annotation.coordinate] animated:YES];
