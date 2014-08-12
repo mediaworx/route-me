@@ -28,11 +28,14 @@
 #import "RMMapLayer.h"
 #import "RMPixel.h"
 
+#define kRMMapLayerTypeKey @"mlt"
+
 @implementation RMMapLayer
 
 @synthesize annotation;
 @synthesize projectedLocation;
 @synthesize enableDragging;
+@synthesize enableLongPress;
 @synthesize userInfo;
 @synthesize canShowCallout;
 @synthesize calloutOffset;
@@ -46,7 +49,9 @@
 
     self.annotation = nil;
     self.enableDragging = NO;
+    self.enableLongPress = NO;
     self.calloutOffset = CGPointZero;
+    [self setMapLayerType:kRMMapLayerTypeGeneric];
 
 	return self;
 }
@@ -62,6 +67,39 @@
 
     return self;
 }
+
+- (void)setMapLayerType:(NSString *)mapLayerType
+{
+    [RMMapLayer setMapLayerType:mapLayerType forLayer:self];
+}
+
+
++ (void)setMapLayerType:(NSString *)mapLayerType forLayer:(CALayer *)layer
+{
+    [layer setValue:mapLayerType forKey:kRMMapLayerTypeKey];
+}
+
+- (NSString *)getMapLayerType
+{
+    return [RMMapLayer getMapLayerTypeForLayer:self];
+}
+
++ (NSString *)getMapLayerTypeForLayer:(CALayer *)layer
+{
+    NSString *type = (NSString *)[layer valueForKey:kRMMapLayerTypeKey];
+    if (!type && layer.superlayer) {
+        type = (NSString *)[layer.superlayer valueForKey:kRMMapLayerTypeKey];
+    }
+    return type;
+}
+
+
+- (void)addSublayer:(CALayer *)layer withMapLayerType:(NSString *)mapLayerType
+{
+    [RMMapLayer setMapLayerType:mapLayerType forLayer:layer];
+    [self addSublayer:layer];
+}
+
 
 - (void)dealloc
 {

@@ -130,6 +130,43 @@ typedef NS_ENUM(NSUInteger, RMUserTrackingMode) {
 *   @param map The map view. */
 - (void)doubleTapOnAnnotation:(RMAnnotation *)annotation at:(CGPoint)point onMap:(RMMapView *)map;
 
+/** Tells the delegate when the user long presses the layer for an annotation. Is only called if longPressOnAnnotationBegan (used to track the drag following the long press) is not implemented.
+ *  @param annotation The annotation that was long pressed.
+ *  @param point the point that was pressed.
+ *  @param map The map view.
+ *  @see ::longPressOnAnnotationBegan:at:onMap:
+ */
+- (void)longPressOnAnnotation:(RMAnnotation *)anAnnotation at:(CGPoint)point onMap:(RMMapView *)map;
+
+/** Tells the delegate when the user begins a long press on the layer for an annotation. If drags following the long press don't have to be handled ::longPressOnAnnotation:at:onMap: should be implemented instead.
+ *  @param annotation The annotation that was long pressed.
+ *  @param point the point that was pressed.
+ *  @param map The map view.
+ *  @see ::longPressOnAnnotationChanged:withDelta:onMap:
+ *  @see ::longPressOnAnnotationEnded:at:onMap:
+ *  @see ::longPressOnAnnotation:at:onMap:
+ */
+- (void)longPressOnAnnotationBegan:(RMAnnotation *)anAnnotation at:(CGPoint)point onMap:(RMMapView *)map;
+
+/** Tells the delegate when a long press on the layer for an annotation changes its position.
+ *  @param annotation The annotation that was long pressed.
+ *  @param point the point that was pressed.
+ *  @param map The map view.
+ *  @see ::longPressOnAnnotationBegan:at:onMap:
+ *  @see ::longPressOnAnnotationEnded:at:onMap:
+ */
+- (void)longPressOnAnnotationChanged:(RMAnnotation *)anAnnotation withDelta:(CGPoint)delta onMap:(RMMapView *)map;
+
+/** Tells the delegate when a long press on the layer for an annotation ends.
+ *  @param annotation The annotation that was long pressed.
+ *  @param point the point that was pressed.
+ *  @param map The map view.
+ *  @see ::longPressOnAnnotationBegan:at:onMap:
+ *  @see ::longPressOnAnnotationChanged:withDelta:onMap:
+ */
+- (void)longPressOnAnnotationEnded:(RMAnnotation *)anAnnotation at:(CGPoint)point onMap:(RMMapView *)map;
+
+
 /** Tells the delegate when the user taps the label for an annotation.
 *   @param annotation The annotation whose label was was tapped.
 *   @param map The map view. */

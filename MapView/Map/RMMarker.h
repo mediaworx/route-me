@@ -29,7 +29,8 @@
 #import "RMMapLayer.h"
 #import "RMFoundation.h"
 
-@class RMMarkerStyle;
+#define kRMMapLayerTypeMarker @"mapLayerTypeMarker"
+#define kRMMapLayerTypeMarkerLabel @"mapLayerTypeMarkerLabel"
 
 /** An RMMarker object is used for simple point annotations on a map view, represented as a single image. RMMarker objects do not change in size when the map view zooms in or out, but instead stay the same size to consistently represent a point on the map view. */
 @interface RMMarker : RMMapLayer

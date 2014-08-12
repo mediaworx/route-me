@@ -88,6 +88,13 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 *   The default value of this property is `YES`. */
 @property (nonatomic, assign) BOOL enableDragging;
 
+/** A Boolean value that determines whether the user may zoom the map.
+*
+*   This property controls only user interactions with the map. If you set the value of this property to `NO`, you may still change the map zoom programmatically.
+*
+*   The default value of this property is `YES`. */
+@property (nonatomic, assign, getter=enableZooming, setter=setEnableZooming:) BOOL enableZooming;
+
 /** A Boolean value that determines whether the map view bounces past the edge of content and back again and whether it animates the content scaling when the scaling exceeds the maximum or minimum limits.
 *
 *   If the value of this property is `YES`, the map view bounces when it encounters a boundary of the content or when zooming exceeds either the maximum or minimum limits for scaling. Bouncing visually indicates that scrolling or zooming has reached an edge of the content. If the value is `NO`, scrolling and zooming stop immediately at the content boundary without bouncing.

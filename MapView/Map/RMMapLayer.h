@@ -32,6 +32,9 @@
 
 @class RMAnnotation;
 
+/** map layer types may be used to identify and differentiate between different types of layers (e.g marker and marker label) */
+#define kRMMapLayerTypeGeneric @"mapLayer"
+
 /** RMMapLayer is a generic class for displaying scrollable vector layers on a map view. Generally, a more specialized subclass such as RMMarker will be used for a specific purpose, but RMMapLayer can also be used directly for special purposes. */
 @interface RMMapLayer : CAScrollLayer
 {
@@ -48,6 +51,27 @@
 
 /** @name Configuring Map Layer Properties */
 
+/** set the type of the layer (may be used to differentiate between different layers and sublayers like markers and labels) */
+- (void)setMapLayerType:(NSString *)layerType;
+
+/** set the type of the layer for a specific layer (e.g. to use it as a sublayer) */
++ (void)setMapLayerType:(NSString *)mapLayerType forLayer:(CALayer *)layer;
+
+/** get the map layer type
+ * @return the map layer type
+ */
+- (NSString *)getMapLayerType;
+
+/** get the map layer type for a specific layer
+ * @return the map layer type OR nil if the given layer is not a map layer or a child of a map layer
+ */
++ (NSString *)getMapLayerTypeForLayer:(CALayer *)layer;
+
+/**
+*
+*/
+- (void)addSublayer:(CALayer *)layer withMapLayerType:(NSString *)mapLayerType;
+
 /** The annotation associated with the layer. This can be useful to inspect the annotation's userInfo in order to customize the visual representation. */
 @property (nonatomic, assign) RMAnnotation *annotation;
 
@@ -56,6 +80,9 @@
 
 /** When set to YES, the layer can be dragged by the user. */
 @property (nonatomic, assign) BOOL enableDragging;
+
+/** When set to YES, the layer can be long pressed by the user. */
+@property (nonatomic, assign) BOOL enableLongPress;
 
 /** Storage for arbitrary data. */
 @property (nonatomic, retain) id userInfo;

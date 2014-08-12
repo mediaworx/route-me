@@ -47,6 +47,9 @@
     if (!(self = [super init]))
         return nil;
 
+    // Flag this layer as a marker for later identification as such
+    [self setMapLayerType:kRMMapLayerTypeMarker];
+
     label = nil;
     textForegroundColor = [UIColor blackColor];
     textBackgroundColor = [UIColor clearColor];
@@ -83,6 +86,22 @@
     [super dealloc];
 }
 
+- (void)flagSubLayerAsMarker:(CALayer *)layer
+{
+    [RMMapLayer setMapLayerType:kRMMapLayerTypeMarker forLayer:layer];
+}
+
+- (void)flagSubLayerAsLabel:(CALayer *)layer
+{
+    [RMMapLayer setMapLayerType:kRMMapLayerTypeMarkerLabel forLayer:layer];
+}
+
+
+- (void)addMarkerSublayer:(CALayer *)layer
+{
+    [self addSublayer:layer withMapLayerType:kRMMapLayerTypeMarker];
+}
+
 #pragma mark -
 
 - (void)replaceUIImage:(UIImage *)image
@@ -113,7 +132,11 @@
     if (aView != nil)
     {
         label = [aView retain];
-        [self addSublayer:[label layer]];
+
+        CALayer *labelLayer = [label layer];
+
+        // add the layer and flag it as a label for later identification as such
+        [self addSublayer:labelLayer withMapLayerType:kRMMapLayerTypeMarkerLabel];
     }
 }
 
