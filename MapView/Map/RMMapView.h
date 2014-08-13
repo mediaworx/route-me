@@ -138,13 +138,23 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 /** The scroll view containing the map tiles */
 @property (nonatomic, assign, readonly) RMMapScrollView *mapScrollView;
 
+/**
+ * UIColor that is displayed as map background during panning while tiles are loaded. You can set an image here using
+ * [UIColor colorWithPatternImage:[UIImage imageNamed:@"your_image.png"]]. Default is a grid looking like MapKit's grid.
+ * If you want a static background for your map, put a view behind the map view and set scrollingColor and
+ * zoomingColor to [UIColor clearColor]
+ */
+@property (nonatomic, retain) UIColor *scrollingColor;
+
+/**
+ * UIColor that is displayed as map background during zooming while tiles are loaded. You can set an image here using
+ * [UIColor colorWithPatternImage:[UIImage imageNamed:@"your_image.png"]]. Default is a grey color mimicking MapKit
+ * behaviour.
+ */
+@property (nonatomic, retain) UIColor *zoomingColor;
+
 /** The view used for map overlays like annotations */
 @property (nonatomic, assign, readonly) RMMapOverlayView *overlayView;
-
-/** A custom, static view to use behind the map tiles. The default behavior is to use grid imagery that moves with map panning like MapKit. */
-@property (nonatomic, retain) UIView *backgroundView;
-
-- (void)setBackgroundImage:(UIImage *)backgroundImage;
 
 /** A Boolean value indicating whether to draw tile borders and z/x/y numbers on tile images for debugging purposes. Defaults to `NO`. */
 @property (nonatomic, assign) BOOL debugTiles;
@@ -166,15 +176,13 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 *   @param initialTileSourceZoomLevel The starting map zoom level, clamped to the zoom levels supported by the tile source(s).
 *   @param initialTileSourceMaxZoomLevel The maximum zoom level allowed by the map view, clamped to the zoom levels supported by the tile source(s).
 *   @param initialTileSourceMinZoomLevel The minimum zoom level allowed by the map view, clamped to the zoom levels supported by the tile source(s).
-*   @param backgroundImage A custom background image to use behind the map instead of the default gridded tile background that moves with the map. 
 *   @return An initialized map view, or `nil` if a map view was unable to be initialized. */
 - (id)initWithFrame:(CGRect)frame
       andTilesource:(id <RMTileSource>)newTilesource
    centerCoordinate:(CLLocationCoordinate2D)initialCenterCoordinate
           zoomLevel:(float)initialTileSourceZoomLevel
        maxZoomLevel:(float)initialTileSourceMaxZoomLevel
-       minZoomLevel:(float)initialTileSourceMinZoomLevel
-    backgroundImage:(UIImage *)backgroundImage;
+       minZoomLevel:(float)initialTileSourceMinZoomLevel;
 
 - (void)setFrame:(CGRect)frame;
 

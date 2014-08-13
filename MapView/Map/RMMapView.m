@@ -46,7 +46,6 @@
 
 #import "RMMapTiledLayerView.h"
 #import "RMMapOverlayView.h"
-#import "RMLoadingTileView.h"
 
 #import "RMUserLocation.h"
 
@@ -143,11 +142,9 @@
     BOOL _delegateHasDidFailToLocateUserWithError;
     BOOL _delegateHasDidChangeUserTrackingMode;
 
-    UIView *_backgroundView;
     RMMapScrollView *_mapScrollView;
     RMMapOverlayView *_overlayView;
     UIView *_tiledLayersSuperview;
-    RMLoadingTileView *_loadingTileView;
 
     RMProjection *_projection;
     RMFractalTileProjection *_mercatorToTileProjection;
@@ -199,6 +196,8 @@
 @synthesize screenScale = _screenScale;
 @synthesize minNumberOfTouchesForPanGestureHandling = _minNumberOfTouchesForPanGestureHandling;
 @synthesize maxNumberOfTouchesForPanGestureHandling = _maxNumberOfTouchesForPanGestureHandling;
+@synthesize scrollingColor = _scrollingColor;
+@synthesize zoomingColor = _zoomingColor;
 @synthesize mapScrollViewIsZooming = _mapScrollViewIsZooming;
 @synthesize tileCache = _tileCache;
 @synthesize quadTree = _quadTree;
@@ -225,7 +224,6 @@
                                   zoomLevel:(float)initialTileSourceZoomLevel
                                maxZoomLevel:(float)initialTileSourceMaxZoomLevel
                                minZoomLevel:(float)initialTileSourceMinZoomLevel
-                            backgroundImage:(UIImage *)backgroundImage
 {
     _constrainMovement = _constrainMovementByUser = _enableBouncing = _zoomingInPivotsAroundCenter = NO;
     _enableDragging = YES;
@@ -246,6 +244,8 @@
     _projection = nil;
     _mercatorToTileProjection = nil;
     _mapScrollView = nil;
+    _scrollingColor = nil;
+    _zoomingColor = nil;
     _overlayView = nil;
 
     _screenScale = [UIScreen mainScreen].scale;
@@ -275,8 +275,6 @@
     [_zoomDelegateQueue setMaxConcurrentOperationCount:1];
 
     [self setTileCache:[[RMTileCache new] autorelease]];
-
-    [self setBackgroundImage:backgroundImage];
 
     _enableZooming = YES;
     if (initialTileSourceMinZoomLevel < newTilesource.minZoom) initialTileSourceMinZoomLevel = newTilesource.minZoom;
@@ -327,8 +325,7 @@
                              centerCoordinate:coordinate
                                     zoomLevel:kDefaultInitialZoomLevel
                                  maxZoomLevel:kDefaultMaximumZoomLevel
-                                 minZoomLevel:kDefaultMinimumZoomLevel
-                              backgroundImage:nil];
+                                 minZoomLevel:kDefaultMinimumZoomLevel];
 
     return self;
 }
@@ -349,8 +346,7 @@
               centerCoordinate:coordinate
                      zoomLevel:kDefaultInitialZoomLevel
                   maxZoomLevel:kDefaultMaximumZoomLevel
-                  minZoomLevel:kDefaultMinimumZoomLevel
-               backgroundImage:nil];
+                  minZoomLevel:kDefaultMinimumZoomLevel];
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -359,7 +355,6 @@
           zoomLevel:(float)initialZoomLevel
        maxZoomLevel:(float)maxZoomLevel
        minZoomLevel:(float)minZoomLevel
-    backgroundImage:(UIImage *)backgroundImage
 {
     if (!(self = [super initWithFrame:frame]))
         return nil;
@@ -368,8 +363,7 @@
                              centerCoordinate:initialCenterCoordinate
                                     zoomLevel:initialZoomLevel
                                  maxZoomLevel:maxZoomLevel
-                                 minZoomLevel:minZoomLevel
-                              backgroundImage:backgroundImage];
+                                 minZoomLevel:minZoomLevel];
 
     return self;
 }
@@ -385,7 +379,6 @@
         RMProjectedPoint centerPoint = self.centerProjectedPoint;
 
         CGRect bounds = CGRectMake(0, 0, frame.size.width, frame.size.height);
-        _backgroundView.frame = bounds;
         _mapScrollView.frame = bounds;
         _overlayView.frame = bounds;
 
@@ -411,7 +404,6 @@
 - (void)dealloc
 {
     [self setDelegate:nil];
-    [self setBackgroundView:nil];
     [self setQuadTree:nil];
     [_moveDelegateQueue cancelAllOperations];
     [_moveDelegateQueue release]; _moveDelegateQueue = nil;
@@ -425,6 +417,8 @@
     [_mapScrollView removeObserver:self forKeyPath:@"contentOffset"];
     [_tiledLayersSuperview release]; _tiledLayersSuperview = nil;
     [_mapScrollView release]; _mapScrollView = nil;
+    [_scrollingColor release]; _scrollingColor = nil;
+    [_zoomingColor release]; _zoomingColor = nil;
     [_overlayView release]; _overlayView = nil;
     [_tileSourcesContainer cancelAllDownloads]; [_tileSourcesContainer release]; _tileSourcesContainer = nil;
     [_projection release]; _projection = nil;
@@ -1178,7 +1172,6 @@
     _mapScrollView = [[RMMapScrollView alloc] initWithFrame:self.bounds];
     _mapScrollView.delegate = self;
     _mapScrollView.opaque = NO;
-    _mapScrollView.backgroundColor = [UIColor clearColor];
     _mapScrollView.showsVerticalScrollIndicator = NO;
     _mapScrollView.showsHorizontalScrollIndicator = NO;
     _mapScrollView.scrollsToTop = NO;
@@ -1191,6 +1184,9 @@
     _mapScrollView.contentOffset = CGPointMake(0.0, 0.0);
     _mapScrollView.clipsToBounds = NO;
     _mapScrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+
+    self.scrollingColor = [UIColor colorWithPatternImage:[RMMapView resourceImageNamed:@"LoadingTile.png"]];
+    self.zoomingColor = [UIColor colorWithRed:0.753 green:0.749 blue:0.733 alpha:1];
 
     _tiledLayersSuperview = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, contentSize.width, contentSize.height)];
     _tiledLayersSuperview.userInteractionEnabled = NO;
@@ -1217,10 +1213,7 @@
     _mapScrollView.zoomScale = exp2f([self zoom]);
     [self setDecelerationMode:_decelerationMode];
 
-    if (_backgroundView)
-        [self insertSubview:_mapScrollView aboveSubview:_backgroundView];
-    else
-        [self insertSubview:_mapScrollView atIndex:0];
+    [self insertSubview:_mapScrollView atIndex:0];
 
     _overlayView = [[RMMapOverlayView alloc] initWithFrame:[self bounds]];
     _overlayView.userInteractionEnabled = NO;
@@ -1321,10 +1314,10 @@
 {
     [self registerZoomEventByUser:(scrollView.pinchGestureRecognizer.state == UIGestureRecognizerStateBegan)];
 
+    if (self.zoomingColor) {
+        _mapScrollView.backgroundColor = self.zoomingColor;
+    }
     _mapScrollViewIsZooming = YES;
-
-    if (_loadingTileView)
-        _loadingTileView.mapZooming = YES;
 }
 
 - (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(float)scale
@@ -1332,22 +1325,16 @@
     [_moveDelegateQueue setSuspended:NO];
     [_zoomDelegateQueue setSuspended:NO];
 
+    if (self.scrollingColor) {
+        _mapScrollView.backgroundColor = self.scrollingColor;
+    }
     _mapScrollViewIsZooming = NO;
 
     [self correctPositionOfAllAnnotations];
-
-    if (_loadingTileView)
-        _loadingTileView.mapZooming = NO;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    if (_loadingTileView)
-    {
-        CGSize delta = CGSizeMake(scrollView.contentOffset.x - _lastContentOffset.x, scrollView.contentOffset.y - _lastContentOffset.y);
-        CGPoint newOffset = CGPointMake(_loadingTileView.contentOffset.x + delta.width, _loadingTileView.contentOffset.y + delta.height);
-        _loadingTileView.contentOffset = newOffset;
-    }
 }
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView
@@ -1727,7 +1714,7 @@
 
         if ([hit isEqual:_overlayView.layer])
             return NO;
-        
+
         if (!hit || ([hit respondsToSelector:@selector(enableDragging)] && ![hit performSelector:@selector(enableDragging)]))
             return NO;
 
@@ -2254,50 +2241,23 @@
     return [[_mapScrollView retain] autorelease];
 }
 
+- (void)setScrollingColor:(UIColor *)scrollingColor {
+    if (_scrollingColor) {
+        [_scrollingColor release];
+    }
+    if (scrollingColor) {
+        _scrollingColor = [scrollingColor retain];
+    }
+    else {
+        _scrollingColor = [UIColor clearColor];
+    }
+    _mapScrollView.backgroundColor = scrollingColor;
+}
+
+
 - (RMMapOverlayView *)overlayView
 {
     return [[_overlayView retain] autorelease];
-}
-
-- (UIView *)backgroundView
-{
-    return [[_backgroundView retain] autorelease];
-}
-
-- (void)setBackgroundView:(UIView *)aView
-{
-    if (_backgroundView == aView)
-        return;
-
-    if (_backgroundView != nil)
-    {
-        [_backgroundView removeFromSuperview];
-        [_backgroundView release];
-    }
-
-    _backgroundView = [aView retain];
-    if (_backgroundView == nil)
-        return;
-
-    _backgroundView.frame = [self bounds];
-
-    [self insertSubview:_backgroundView atIndex:0];
-}
-
-- (void)setBackgroundImage:(UIImage *)backgroundImage
-{
-    if (backgroundImage)
-    {
-        _loadingTileView = nil;
-        [self setBackgroundView:[[[UIView alloc] initWithFrame:[self bounds]] autorelease]];
-        self.backgroundView.layer.contents = (id)backgroundImage.CGImage;
-    }
-    else
-    {
-        _loadingTileView = [[[RMLoadingTileView alloc] initWithFrame:self.bounds] autorelease];
-        [self setBackgroundView:_loadingTileView];
-;
-    }
 }
 
 - (double)metersPerPixel
