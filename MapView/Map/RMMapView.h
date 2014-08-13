@@ -113,6 +113,12 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 @property (nonatomic, readonly) double scaleDenominator; // The denominator in a cartographic scale like 1/24000, 1/50000, 1/2000000.
 @property (nonatomic, readonly) float screenScale;
 
+/** the minimum number of touches needed for handling the pan gesture (default is 1). If at least minNumberOfTouchesForPanGestureHandling touches are used to pan the map the pan is handled */
+@property (nonatomic, assign) int minNumberOfTouchesForPanGestureHandling;
+
+/** the maximum number of touches allowed for handling the pan gesture (default is 1). If at most maxNumberOfTouchesForPanGestureHandling touches are used to pan the map the pan is handled */
+@property (nonatomic, assign) int maxNumberOfTouchesForPanGestureHandling;
+
 /** @name Supporting Retina Displays */
 
 /** A Boolean value that adjusts the display of map tile images for retina-capable screens.

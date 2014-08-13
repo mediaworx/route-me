@@ -197,6 +197,8 @@
 @synthesize zoomingInPivotsAroundCenter = _zoomingInPivotsAroundCenter;
 @synthesize minZoom = _minZoom, maxZoom = _maxZoom;
 @synthesize screenScale = _screenScale;
+@synthesize minNumberOfTouchesForPanGestureHandling = _minNumberOfTouchesForPanGestureHandling;
+@synthesize maxNumberOfTouchesForPanGestureHandling = _maxNumberOfTouchesForPanGestureHandling;
 @synthesize mapScrollViewIsZooming = _mapScrollViewIsZooming;
 @synthesize tileCache = _tileCache;
 @synthesize quadTree = _quadTree;
@@ -247,6 +249,9 @@
     _overlayView = nil;
 
     _screenScale = [UIScreen mainScreen].scale;
+
+    _minNumberOfTouchesForPanGestureHandling = 1;
+    _maxNumberOfTouchesForPanGestureHandling = 1;
 
     _boundingMask = RMMapMinWidthBound;
     _adjustTilesForRetinaDisplay = NO;
@@ -1251,17 +1256,23 @@
     [self addGestureRecognizer:twoFingerSingleTapRecognizer];
 
     // pan
-    UIPanGestureRecognizer *panGestureRecognizer = [[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)] autorelease];
-    panGestureRecognizer.minimumNumberOfTouches = 1;
-    panGestureRecognizer.maximumNumberOfTouches = 1;
+
+    // Disabled the original PanGestureRecognizer, use the MapScrollView's recognizer instead (see below)
+    // UIPanGestureRecognizer *panGestureRecognizer = [[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)] autorelease];
+    // panGestureRecognizer.minimumNumberOfTouches = 1;
+    // panGestureRecognizer.maximumNumberOfTouches = 1;
 
     // the delegate is used to decide whether a pan should be handled by this
     // recognizer or by the pan gesture recognizer of the scrollview
-    panGestureRecognizer.delegate = self;
+    // panGestureRecognizer.delegate = self;
 
+    // NSLog(@"Adding panGestureRecognizer %@", panGestureRecognizer);
     // the pan recognizer is added to the scrollview as it competes with the
     // pan recognizer of the scrollview
-    [_mapScrollView addGestureRecognizer:panGestureRecognizer];
+    // [_mapScrollView addGestureRecognizer:panGestureRecognizer];
+
+    // Use the MapScrollView's existing PanGestureRecognizer, numberOfTouches is handled in handlePanGesture
+    [_mapScrollView.panGestureRecognizer addTarget:self action:@selector(handlePanGesture:)];
 
     @synchronized (_annotations)
     {
@@ -1737,6 +1748,11 @@
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)recognizer
 {
+    // only handle pans if the right number of touches were panning (min and max default to 1, that's the original route-me behaviour)
+    if (recognizer.numberOfTouches < _minNumberOfTouchesForPanGestureHandling || recognizer.numberOfTouches > _maxNumberOfTouchesForPanGestureHandling) {
+        return;
+    }
+
     if (recognizer.state == UIGestureRecognizerStateBegan)
     {
         CALayer *hit = [_overlayView.layer hitTest:[recognizer locationInView:self]];
