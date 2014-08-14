@@ -53,7 +53,7 @@
 
 #pragma mark --- begin constants ----
 
-#define kZoomRectPixelBuffer 150.0
+#define kDefaultZoomRectPixelBuffer 150.0
 
 #define kDefaultInitialLatitude 47.56
 #define kDefaultInitialLongitude 10.22
@@ -208,6 +208,7 @@
 @synthesize clusterMarkerSize = _clusterMarkerSize, clusterAreaSize = _clusterAreaSize;
 @synthesize adjustTilesForRetinaDisplay = _adjustTilesForRetinaDisplay;
 @synthesize scaleMaxZoomLevelWhenDisplayingRetinaTiles = _scaleMaxZoomLevelWhenDisplayingRetinaTiles;
+@synthesize zoomRectPixelBuffer = _zoomRectPixelBuffer;
 @synthesize userLocation = _userLocation;
 @synthesize showsUserLocation = _showsUserLocation;
 @synthesize userTrackingMode = _userTrackingMode;
@@ -256,6 +257,8 @@
 
     _boundingMask = RMMapMinWidthBound;
     _adjustTilesForRetinaDisplay = NO;
+    _scaleMaxZoomLevelWhenDisplayingRetinaTiles = NO;
+    _zoomRectPixelBuffer = kDefaultZoomRectPixelBuffer;
     _missingTilesDepth = 0;
     _debugTiles = NO;
 
@@ -1074,6 +1077,7 @@
 #pragma mark -
 #pragma mark Zoom With Bounds
 
+// TODO: get rid of zoomRectPixelBuffer; it would be better to have a zoom buffer that's calculated with the map view's frame. If the frame is bigger than the viewport, a suitable buffer is needed so that the zoomed rect is fully visible in the view port. But it works like good old route-me 2012 again, so it's fine for now
 - (void)zoomWithLatitudeLongitudeBoundsSouthWest:(CLLocationCoordinate2D)southWest northEast:(CLLocationCoordinate2D)northEast animated:(BOOL)animated
 {
     if (northEast.latitude == southWest.latitude && northEast.longitude == southWest.longitude) // There are no bounds, probably only one marker.
@@ -1093,6 +1097,7 @@
     else
     {
         // Convert northEast/southWest into RMMercatorRect and call zoomWithBounds
+        float pixelBuffer = self.zoomRectPixelBuffer;
         CLLocationCoordinate2D midpoint = {
             .latitude = (northEast.latitude + southWest.latitude) / 2,
             .longitude = (northEast.longitude + southWest.longitude) / 2
@@ -1115,18 +1120,18 @@
 
         if ((myPoint.x / self.bounds.size.width) < (myPoint.y / self.bounds.size.height))
         {
-            if ((myPoint.y / self.bounds.size.height) > 1)
+            if ((myPoint.y / (self.bounds.size.height - pixelBuffer)) > 1)
             {
-                zoomRect.size.width = self.bounds.size.width * (myPoint.y / self.bounds.size.height);
-                zoomRect.size.height = self.bounds.size.height * (myPoint.y / self.bounds.size.height);
+                zoomRect.size.width = self.bounds.size.width * (myPoint.y / (self.bounds.size.height - pixelBuffer));
+                zoomRect.size.height = self.bounds.size.height * (myPoint.y / (self.bounds.size.height - pixelBuffer));
             }
         }
         else
         {
-            if ((myPoint.x / self.bounds.size.width) > 1)
+            if ((myPoint.x / (self.bounds.size.width - pixelBuffer)) > 1)
             {
-                zoomRect.size.width = self.bounds.size.width * (myPoint.x / self.bounds.size.width);
-                zoomRect.size.height = self.bounds.size.height * (myPoint.x / self.bounds.size.width);
+                zoomRect.size.width = self.bounds.size.width * (myPoint.x / (self.bounds.size.width - pixelBuffer));
+                zoomRect.size.height = self.bounds.size.height * (myPoint.x / (self.bounds.size.width - pixelBuffer));
             }
         }
 
@@ -1470,7 +1475,7 @@
         _accumulatedDelta.x += delta.x;
         _accumulatedDelta.y += delta.y;
 
-        if (fabsf(_accumulatedDelta.x) < kZoomRectPixelBuffer && fabsf(_accumulatedDelta.y) < kZoomRectPixelBuffer)
+        if (fabsf(_accumulatedDelta.x) < self.zoomRectPixelBuffer && fabsf(_accumulatedDelta.y) < self.zoomRectPixelBuffer)
         {
             [_overlayView moveLayersBy:_accumulatedDelta];
             [self performSelector:@selector(correctPositionOfAllAnnotations) withObject:nil afterDelay:0.1];
@@ -2758,7 +2763,7 @@
             return;
         }
 
-        double boundingBoxBuffer = (kZoomRectPixelBuffer * _metersPerPixel);
+        double boundingBoxBuffer = (self.zoomRectPixelBuffer * _metersPerPixel);
 
         RMProjectedRect boundingBox = self.projectedBounds;
         boundingBox.origin.x -= boundingBoxBuffer;

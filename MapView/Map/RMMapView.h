@@ -132,6 +132,11 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 */
 @property (nonatomic, assign)   BOOL scaleMaxZoomLevelWhenDisplayingRetinaTiles;
 
+/**
+* Buffer for zooming, may be set if the map view is larger than the view port or is covered by other views, default is 150.0
+*/
+@property (nonatomic, assign) float zoomRectPixelBuffer;
+
 @property (nonatomic, readonly) float adjustedZoomForRetinaDisplay; // takes adjustTilesForRetinaDisplay and screen scale into account
 
 /** @name Fine-Tuning the Map Appearance */
