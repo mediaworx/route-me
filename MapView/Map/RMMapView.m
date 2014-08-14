@@ -207,6 +207,7 @@
 @synthesize orderClusterMarkersAboveOthers = _orderClusterMarkersAboveOthers;
 @synthesize clusterMarkerSize = _clusterMarkerSize, clusterAreaSize = _clusterAreaSize;
 @synthesize adjustTilesForRetinaDisplay = _adjustTilesForRetinaDisplay;
+@synthesize scaleMaxZoomLevelWhenDisplayingRetinaTiles = _scaleMaxZoomLevelWhenDisplayingRetinaTiles;
 @synthesize userLocation = _userLocation;
 @synthesize showsUserLocation = _showsUserLocation;
 @synthesize userTrackingMode = _userTrackingMode;
@@ -967,8 +968,9 @@
     float zoomDelta = log2f(zoomFactor);
     float targetZoom = zoomDelta + [self zoom];
 
-    if (targetZoom == [self zoom])
+    if (targetZoom == [self zoom]) {
         return;
+    }
 
     // clamp zoom to remain below or equal to maxZoom after zoomAfter will be applied
     // Set targetZoom to maxZoom so the map zooms to its maximum
@@ -2354,8 +2356,9 @@
 {
     tileSourcesMaxZoom = floorf(tileSourcesMaxZoom);
 
-    if ( ! self.adjustTilesForRetinaDisplay && _screenScale > 1.0)
+    if (!self.adjustTilesForRetinaDisplay && !self.scaleMaxZoomLevelWhenDisplayingRetinaTiles && _screenScale > 1.0) {
         tileSourcesMaxZoom -= 1.0;
+    }
 
     [self setMaxZoom:tileSourcesMaxZoom];
 }
@@ -2470,7 +2473,23 @@
 
     [self createMapView];
 
+    // readjust min and max zoom
+    [self setTileSourcesMinZoom:_tileSourcesContainer.minZoom];
+    [self setTileSourcesMaxZoom:_tileSourcesContainer.maxZoom];
+
     [self setCenterProjectedPoint:centerPoint animated:NO];
+}
+
+- (void)setScaleMaxZoomLevelWhenDisplayingRetinaTiles:(BOOL)doScaleMaxZoomLevelWhenDisplayingRetinaTiles
+{
+    if (_scaleMaxZoomLevelWhenDisplayingRetinaTiles == doScaleMaxZoomLevelWhenDisplayingRetinaTiles) {
+        return;
+    }
+
+    _scaleMaxZoomLevelWhenDisplayingRetinaTiles = doScaleMaxZoomLevelWhenDisplayingRetinaTiles;
+
+    // readjust max zoom
+    [self setTileSourcesMaxZoom:_tileSourcesContainer.maxZoom];
 }
 
 - (float)adjustedZoomForRetinaDisplay

@@ -126,6 +126,12 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 *   If set to `YES`, the map tiles are drawn at double size, typically 512 pixels square instead of 256 pixels, in order to compensate for smaller features and to make them more legible. If tiles designed for retina devices are used, this value should be set to `NO` in order to display these tiles at the proper size. The default value is `NO`. */
 @property (nonatomic, assign)   BOOL adjustTilesForRetinaDisplay;
 
+/** A Boolean value enabling a scaled max zoom level when displaying retina tiles (if adjustTilesForRetinaDisplay == NO).
+*
+* If set to `YES` when retina tiles are displayed, an extra zoom level is added that scales the tiles of the maximum zoom level.
+*/
+@property (nonatomic, assign)   BOOL scaleMaxZoomLevelWhenDisplayingRetinaTiles;
+
 @property (nonatomic, readonly) float adjustedZoomForRetinaDisplay; // takes adjustTilesForRetinaDisplay and screen scale into account
 
 /** @name Fine-Tuning the Map Appearance */
