@@ -90,11 +90,6 @@
             return image;
     }
 
-    dispatch_async(dispatch_get_main_queue(), ^(void)
-    {
-        [[NSNotificationCenter defaultCenter] postNotificationName:RMTileRequested object:[NSNumber numberWithUnsignedLongLong:RMTileKey(tile)]];
-    });
-
     [tileCache retain];
 
     // Prevent double downloads
@@ -117,6 +112,11 @@
             return image;
         }
     }
+
+    dispatch_async(dispatch_get_main_queue(), ^(void)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:RMTileRequested object:[NSNumber numberWithUnsignedLongLong:RMTileKey(tile)]];
+    });
 
     [activeDownloadsTileHashes addObject:tileHash];
     [activeDownloadsCondition unlock];
