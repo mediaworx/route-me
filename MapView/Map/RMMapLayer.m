@@ -36,6 +36,7 @@
 @synthesize projectedLocation;
 @synthesize enableDragging;
 @synthesize enableLongPress;
+@synthesize cancelTapsOnMap;
 @synthesize userInfo;
 @synthesize canShowCallout;
 @synthesize calloutOffset;
@@ -50,6 +51,7 @@
     self.annotation = nil;
     self.enableDragging = NO;
     self.enableLongPress = NO;
+    self.cancelTapsOnMap = YES;
     self.calloutOffset = CGPointZero;
     [self setMapLayerType:kRMMapLayerTypeGeneric];
 

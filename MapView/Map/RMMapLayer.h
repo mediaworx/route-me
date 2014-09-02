@@ -78,11 +78,17 @@
 /** The current projected location of the layer on the map. */
 @property (nonatomic, assign) RMProjectedPoint projectedLocation;
 
-/** When set to YES, the layer can be dragged by the user. */
+/** When set to YES, the layer can be dragged by the user (defaults to NO). */
 @property (nonatomic, assign) BOOL enableDragging;
 
-/** When set to YES, the layer can be long pressed by the user. */
+/** When set to YES, the layer can be long pressed by the user (defaults to NO). */
 @property (nonatomic, assign) BOOL enableLongPress;
+
+/**
+ * Flag denoting if a tap on the layer is also registered as a tap on the map. If set to NO, a tap on the annotation
+ * is additionaly registered on the map, if set to YES, the tap is cancelled (defaults to YES).
+ */
+@property (nonatomic, assign) BOOL cancelTapsOnMap;
 
 /** Storage for arbitrary data. */
 @property (nonatomic, retain) id userInfo;

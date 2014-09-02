@@ -1793,10 +1793,10 @@
     {
         [_delegate tapOnAnnotation:anAnnotation at:aPoint onMap:self];
     }
-    else
+
+    if (!_delegateHasTapOnAnnotation || anAnnotation == nil || !anAnnotation.layer.cancelTapsOnMap)
     {
-        if (_delegateHasSingleTapOnMap)
-            [_delegate singleTapOnMap:self at:aPoint];
+        [self singleTapAtPoint:aPoint];
     }
 }
 
