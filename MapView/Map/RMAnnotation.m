@@ -102,16 +102,21 @@
     [super dealloc];
 }
 
-- (void)setCoordinate:(CLLocationCoordinate2D)aCoordinate
+- (void)setCoordinate:(CLLocationCoordinate2D)aCoordinate animated:(BOOL)animated
 {
     coordinate = aCoordinate;
     self.projectedLocation = [[mapView projection] coordinateToProjectedPoint:aCoordinate];
-    self.position = [mapView projectedPointToPixel:self.projectedLocation];
+    [self setPosition:[mapView projectedPointToPixel:self.projectedLocation] animated:animated];
 
     if (!self.hasBoundingBox)
         self.projectedBoundingBox = RMProjectedRectMake(self.projectedLocation.x, self.projectedLocation.y, 1.0, 1.0);
 
     [self.quadTreeNode performSelector:@selector(annotationDidChangeBoundingBox:) withObject:self];
+}
+
+- (void)setCoordinate:(CLLocationCoordinate2D)aCoordinate
+{
+    [self setCoordinate:aCoordinate animated:YES];
 }
 
 - (void)setMapView:(RMMapView *)aMapView

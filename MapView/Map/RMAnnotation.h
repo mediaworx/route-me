@@ -140,6 +140,8 @@
 
 #pragma mark -
 
+- (void)setCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated;
+
 - (void)setPosition:(CGPoint)position animated:(BOOL)animated;
 
 #pragma mark -
