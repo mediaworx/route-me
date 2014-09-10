@@ -72,6 +72,13 @@
 */
 - (void)addSublayer:(CALayer *)layer withMapLayerType:(NSString *)mapLayerType;
 
+/**
+* base zPosition for the annotation (defaults to 10.000), may be used to position map layers on different levels so
+* all layers of a specific kind may be positioned above or below layers of another kind.
+*/
+@property (nonatomic, readonly) CGFloat baseZPosition;
+
+
 /** The annotation associated with the layer. This can be useful to inspect the annotation's userInfo in order to customize the visual representation. */
 @property (nonatomic, assign) RMAnnotation *annotation;
 

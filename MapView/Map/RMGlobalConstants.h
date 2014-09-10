@@ -36,4 +36,6 @@ static const double kRMMaxLatitude = kMaxLat;
 static const double kRMMinLongitude = -kMaxLong;
 static const double kRMMaxLongitude = kMaxLong;
 
+#define kRMDefaultMapLayerBaseZPosition 10000.0f
+
 #endif

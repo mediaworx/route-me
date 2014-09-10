@@ -48,6 +48,7 @@
 	if (!(self = [super init]))
 		return nil;
 
+    self.zPosition = self.baseZPosition;
     self.annotation = nil;
     self.enableDragging = NO;
     self.enableLongPress = NO;
@@ -63,11 +64,16 @@
     if (!(self = [super initWithLayer:layer]))
         return nil;
 
+    self.zPosition = self.baseZPosition;
     self.annotation = nil;
     self.userInfo = nil;
     self.calloutOffset = CGPointZero;
 
     return self;
+}
+
+- (CGFloat)baseZPosition {
+    return kRMDefaultMapLayerBaseZPosition;
 }
 
 - (void)setMapLayerType:(NSString *)mapLayerType
