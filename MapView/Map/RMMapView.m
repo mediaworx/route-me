@@ -1338,6 +1338,18 @@
     _mapScrollViewIsZooming = NO;
 
     [self correctPositionOfAllAnnotations];
+
+    // correct hit test tolerance paths for RMShapes
+    for (RMAnnotation *annotation in _visibleAnnotations) {
+        // only handle RMShape layers
+        if (!annotation.layer || ![annotation.layer isKindOfClass:RMShape.class]) {
+            continue;
+        }
+        RMShape *shape = (RMShape *)annotation.layer;
+        if (shape.usesHitTestTolerance) {
+            [shape updateHitTestPath];
+        }
+    }
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView

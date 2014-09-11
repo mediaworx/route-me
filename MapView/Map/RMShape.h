@@ -34,19 +34,6 @@
 
 /** An RMShape object is used to represent a line, polygon, or other shape composed of two or more points connected by lines. An RMShape object changes visible size in response to map zooms in order to consistently represent coverage of the same geographic area. */
 @interface RMShape : RMMapLayer
-{
-    CGRect pathBoundingBox;
-
-    // Width of the line, in pixels
-    float lineWidth;
-
-    // Line dash style
-    NSArray *lineDashLengths;
-    CGFloat lineDashPhase;
-
-    BOOL scaleLineWidth;
-    BOOL scaleLineDash; // if YES line dashes will be scaled to keep a constant size if the layer is zoomed
-}
 
 /** @name Creating Shape Objects */
 
@@ -56,17 +43,17 @@
 
 /** @name Accessing the Drawing Properties */
 
-@property (nonatomic, retain) NSString *fillRule;
-@property (nonatomic, retain) NSString *lineCap;
-@property (nonatomic, retain) NSString *lineJoin;
+@property (nonatomic, strong) NSString *fillRule;
+@property (nonatomic, strong) NSString *lineCap;
+@property (nonatomic, strong) NSString *lineJoin;
 
 /** The line color of the shape. Defaults to black. */
-@property (nonatomic, retain) UIColor *lineColor;
+@property (nonatomic, strong) UIColor *lineColor;
 
 /** The fill color of the shape. Defaults to clear. */
-@property (nonatomic, retain) UIColor *fillColor;
+@property (nonatomic, strong) UIColor *fillColor;
 
-@property (nonatomic, assign) NSArray *lineDashLengths;
+@property (nonatomic, strong) NSArray *lineDashLengths;
 @property (nonatomic, assign) CGFloat lineDashPhase;
 @property (nonatomic, assign) BOOL scaleLineDash;
 
@@ -80,6 +67,9 @@
 
 /** The bounding box of the shape in the current viewport. */
 @property (nonatomic, readonly) CGRect pathBoundingBox;
+
+/** @return YES, if the hit test methods shapeContainsPoint: and shapeHitTest: use a tolerance value, NO otherwise */
+@property (nonatomic, assign, readonly) BOOL usesHitTestTolerance;
 
 /** @name Drawing Shapes */
 
@@ -137,5 +127,43 @@
 *
 * There is no requirement that a path be closed. */
 - (void)closePath;
+
+#pragma mark - Shape hit test
+
+/**
+* Checks if the shape contains the given point. If prepareShapeHitTestWithTolerance: was used to set a tolerance, this
+* method returns true if the point's distance to the shape is lower than the given tolerance.
+* @param point The point to check
+* @returns true if the point was on the shape or within the tolerance distance, false otherwise
+*/
+- (BOOL)shapeContainsPoint:(CGPoint)point;
+
+/**
+* Checks if the shape contains the given point and if so returns the shape layer. If prepareShapeHitTestWithTolerance:
+* was used to set a tolerance, this method returns the shape layer if the point's distance to the shape is lower than
+* the given tolerance.
+* @param point The point to check
+* @returns the shape layer if the point was on the shape or within the tolerance distance, nil otherwise
+*/
+- (CAShapeLayer *)shapeHitTest:(CGPoint)point;
+
+/**
+* If your shape is just a line, hitting that line with a finger will be close to impossible. To make hit tests
+* successful even if tapping close to the line, you can define a tolerance that's added around your line.
+* So if a tap happens within a distance that's less than the given tolerance, a hit will be registered.
+* This method has to be explicitly called after changes to the shape to recalculate the hit test path. Eg. if you
+* use a PanGestureRecognizer to paint a shape on the map, this should be called on UIGestureRecognizerStateEnded.
+* On long shapes this method may be expensive, so only call it when it's necessary (and don't call it on every point
+* when painting with the finger).
+* Hit tests with tolerance won't work with the usual containsPoint: method. Use shapeContainsPoint: instead.
+* @param tolerance the tolerance to be used
+*/
+- (void)prepareShapeHitTestWithTolerance:(float)tolerance;
+
+/**
+* refreshes the hit test path. This is automatically called after zooms.
+*/
+- (void)updateHitTestPath;
+
 
 @end
