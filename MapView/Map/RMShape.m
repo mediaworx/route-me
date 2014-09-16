@@ -32,9 +32,7 @@
 
 @interface RMShape()
 @property (nonatomic, strong) CAShapeLayer *shapeLayer;
-// TODO: temporary code for testing only, remove ########
-@property (nonatomic, strong) CAShapeLayer *strokeLayer;
-// TODO: remove #########################################
+@property (nonatomic, strong) CAShapeLayer *hitTestLayer;
 @property (nonatomic, strong) UIBezierPath *bezierPath;
 @property (nonatomic, strong) UIBezierPath *scaledPath;
 @property (nonatomic, strong) UIBezierPath *hitTestTargetPath;
@@ -102,21 +100,19 @@
     return self;
 }
 
-// TODO: temporary code for testing only, remove ########
-- (void)initStrokeLayer
+- (void)initHitTestLayer
 {
-    _strokeLayer = [CAShapeLayer new];
-    _strokeLayer.rasterizationScale = [[UIScreen mainScreen] scale];
-    _strokeLayer.lineWidth = 2.0;
-    _strokeLayer.lineCap = kCALineCapRound;
-    _strokeLayer.lineJoin = kCALineJoinRound;
-    _strokeLayer.strokeColor = [UIColor clearColor].CGColor;
-    _strokeLayer.fillColor = CGColorCreateCopyWithAlpha(_shapeLayer.strokeColor, 0.3);
-    _strokeLayer.shadowRadius = 0.0;
-    _strokeLayer.shadowOpacity = 0.0;
-    _strokeLayer.shadowOffset = CGSizeMake(0, 0);
+    _hitTestLayer = [CAShapeLayer new];
+    _hitTestLayer.rasterizationScale = [[UIScreen mainScreen] scale];
+    _hitTestLayer.lineWidth = 2.0;
+    _hitTestLayer.lineCap = kCALineCapRound;
+    _hitTestLayer.lineJoin = kCALineJoinRound;
+    _hitTestLayer.strokeColor = [UIColor clearColor].CGColor;
+    _hitTestLayer.fillColor = CGColorCreateCopyWithAlpha(_shapeLayer.strokeColor, 0.2);
+    _hitTestLayer.shadowRadius = 0.0;
+    _hitTestLayer.shadowOpacity = 0.0;
+    _hitTestLayer.shadowOffset = CGSizeMake(0, 0);
 }
-// TODO: remove #########################################
 
 
 - (void)dealloc
@@ -126,9 +122,7 @@
     _scaledPath = nil;
     _hitTestTargetPath = nil;
     _shapeLayer = nil;
-// TODO: temporary code for testing only, remove ########
-    _strokeLayer = nil;
-// TODO: remove #########################################
+    _hitTestLayer = nil;
     _points = nil;
 }
 
@@ -456,20 +450,15 @@
     [self recalculateGeometryAnimated:NO];
 }
 
-// TODO: temporary code for testing only, remove ########
-- (void)showShapeStroke
+- (void)clear
 {
-    if (!_strokeLayer) {
-        [self initStrokeLayer];
-    }
-    else {
-        [_strokeLayer removeFromSuperlayer];
-    }
-    _strokeLayer.path = _hitTestTargetPath.CGPath;
-    [self insertSublayer:_strokeLayer above:_shapeLayer];
+    [_bezierPath removeAllPoints];
+    [_hitTestTargetPath removeAllPoints];
+    [_points removeAllObjects];
+    _isFirstPoint = YES;
+    _hitTestTargetPath = nil;
+    _usesHitTestTolerance = NO;
 }
-// TODO: remove ########################################
-
 
 #pragma mark - Shape hit test
 
@@ -481,13 +470,14 @@
 
 - (BOOL)shapeContainsPoint:(CGPoint)point
 {
-    if (![_shapeLayer containsPoint:point]) {
+    if (!CGRectContainsPoint(self.frame, point)) {
         return NO;
     }
+    CGPoint testPoint = [self convertPoint:point fromLayer:self.mapView.layer];
     if (_hitTestTargetPath) {
-        return [_hitTestTargetPath containsPoint:point];
+        return [_hitTestTargetPath containsPoint:testPoint];
     }
-    return CGPathContainsPoint(_shapeLayer.path, nil, point, [_shapeLayer.fillRule isEqualToString:kCAFillRuleEvenOdd]);
+    return CGPathContainsPoint(_shapeLayer.path, nil, testPoint, [_shapeLayer.fillRule isEqualToString:kCAFillRuleEvenOdd]);
 }
 
 - (CAShapeLayer *)shapeHitTest:(CGPoint)point
@@ -528,11 +518,29 @@
 
     _hitTestTargetPath = [UIBezierPath bezierPathWithCGPath:targetPath];
     CGPathRelease(targetPath);
-
-    // TODO: temporary code for testing only, remove ########
-    [self showShapeStroke];
-    // TODO: remove #########################################
 }
+
+- (void)showHitTestArea
+{
+    if (!_hitTestLayer) {
+        [self initHitTestLayer];
+    }
+    if (!self.hitTestAreaVisible) {
+        // always make sure the layer uses the current path
+        _hitTestLayer.path = _hitTestTargetPath.CGPath;
+        [self insertSublayer:_hitTestLayer below:_shapeLayer];
+        _hitTestAreaVisible = YES;
+    }
+}
+
+- (void)hideHitTestArea
+{
+    if (self.hitTestAreaVisible) {
+        [_hitTestLayer removeFromSuperlayer];
+        _hitTestAreaVisible = NO;
+    }
+}
+
 
 #pragma mark - Accessors
 
@@ -586,9 +594,7 @@
     if (_shapeLayer.strokeColor != aLineColor.CGColor)
     {
         _shapeLayer.strokeColor = aLineColor.CGColor;
-        // TODO: temporary code for testing only, remove ########
-        _strokeLayer.fillColor = CGColorCreateCopyWithAlpha(_shapeLayer.strokeColor, 0.3);
-        // TODO: remove #########################################
+        _hitTestLayer.fillColor = CGColorCreateCopyWithAlpha(_shapeLayer.strokeColor, 0.3);
         [self setNeedsDisplay];
     }
 }

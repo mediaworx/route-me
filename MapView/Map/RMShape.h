@@ -71,6 +71,12 @@
 /** @return YES, if the hit test methods shapeContainsPoint: and shapeHitTest: use a tolerance value, NO otherwise */
 @property (nonatomic, assign, readonly) BOOL usesHitTestTolerance;
 
+/**
+* @return YES if the hitTestArea is visible (used to hide it befor map zooms) after a call of
+* showHitTestArea
+*/
+@property (nonatomic, assign, readonly) BOOL hitTestAreaVisible;
+
 /** @name Drawing Shapes */
 
 /** Move the drawing pen to a projected point. 
@@ -123,6 +129,12 @@
 *   @param block A block containing the operations to perform. */
 - (void)performBatchOperations:(void (^)(RMShape *aShape))block;
 
+/**
+* removes all points
+*/
+- (void)clear;
+
+
 /** Closes the path, connecting the last point to the first. After this action, no further points can be added to the path.
 *
 * There is no requirement that a path be closed. */
@@ -133,7 +145,10 @@
 /**
 * Checks if the shape contains the given point. If prepareShapeHitTestWithTolerance: was used to set a tolerance, this
 * method returns true if the point's distance to the shape is lower than the given tolerance.
-* @param point The point to check
+* Note: closed shapes don't use the hit test tolerance, so shapeContainsPoint: only returns YES if the point is within
+* the closed area.
+* @param point The point to check (must be in the coordinates of the map view or the map overlay view, so you can
+* directly use the the points you got from a gesture recognizer on either view)
 * @returns true if the point was on the shape or within the tolerance distance, false otherwise
 */
 - (BOOL)shapeContainsPoint:(CGPoint)point;
@@ -142,7 +157,10 @@
 * Checks if the shape contains the given point and if so returns the shape layer. If prepareShapeHitTestWithTolerance:
 * was used to set a tolerance, this method returns the shape layer if the point's distance to the shape is lower than
 * the given tolerance.
-* @param point The point to check
+* Note: closed shapes don't use the hit test tolerance, so shapeHitTest: only returns the layer if the point is within
+* the closed area.
+* @param point The point to check (must be in the coordinates of the map view or the map overlay view, so you can
+* directly use the the points you got from a gesture recognizer on either view)
 * @returns the shape layer if the point was on the shape or within the tolerance distance, nil otherwise
 */
 - (CAShapeLayer *)shapeHitTest:(CGPoint)point;
@@ -156,9 +174,25 @@
 * On long shapes this method may be expensive, so only call it when it's necessary (and don't call it on every point
 * when painting with the finger).
 * Hit tests with tolerance won't work with the usual containsPoint: method. Use shapeContainsPoint: instead.
+* Note: closed shapes don't use the hit test tolerance
 * @param tolerance the tolerance to be used
 */
 - (void)prepareShapeHitTestWithTolerance:(float)tolerance;
+
+/**
+* displays the tolerance area for hit tests with alpha .2 of the original stroke color. Right now the alpha is not
+* configurable as visible hit test areas have only been used for debugging and testing so far, but it could easily be
+* done.
+* Note: closed shapes don't use a hit test area
+*/
+- (void)showHitTestArea;
+
+/**
+* hides the tolerance area for hit tests (see showHitTestArea).
+* Note: closed shapes don't use a hit test area
+*/
+- (void)hideHitTestArea;
+
 
 /**
 * refreshes the hit test path. This is automatically called after zooms.

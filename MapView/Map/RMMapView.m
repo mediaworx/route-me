@@ -152,6 +152,7 @@
 
     NSMutableSet *_annotations;
     NSMutableSet *_visibleAnnotations;
+    NSMutableSet *_annotationsShowingHitTestArea;
 
     BOOL _constrainMovement, _constrainMovementByUser;
     RMProjectedRect _constrainingProjectedBounds, _constrainingProjectedBoundsByUser;
@@ -267,6 +268,7 @@
 
     _annotations = [NSMutableSet new];
     _visibleAnnotations = [NSMutableSet new];
+    _annotationsShowingHitTestArea = [NSMutableSet new];
     [self setQuadTree:[[[RMQuadTree alloc] initWithMapView:self] autorelease]];
     _enableClustering = _positionClusterMarkersAtTheGravityCenter = NO;
     _clusterMarkerSize = CGSizeMake(100.0, 100.0);
@@ -417,6 +419,7 @@
     [_longPressedAnnotation release]; _longPressedAnnotation = nil;
     [_annotations release]; _annotations = nil;
     [_visibleAnnotations release]; _visibleAnnotations = nil;
+    [_annotationsShowingHitTestArea release]; _annotationsShowingHitTestArea = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_mapScrollView removeObserver:self forKeyPath:@"contentOffset"];
     [_tiledLayersSuperview release]; _tiledLayersSuperview = nil;
@@ -1258,7 +1261,7 @@
     // pan
 
     // Disabled the original PanGestureRecognizer, use the MapScrollView's recognizer instead (see below)
-    // UIPanGestureRecognizer *panGestureRecognizer = [[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)] autorelease];
+    // UIPanGestureRecognizer *panGestureRecognizer = [[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGestureWithRecognizer:)] autorelease];
     // panGestureRecognizer.minimumNumberOfTouches = 1;
     // panGestureRecognizer.maximumNumberOfTouches = 1;
 
@@ -1325,6 +1328,19 @@
         _mapScrollView.backgroundColor = self.zoomingColor;
     }
     _mapScrollViewIsZooming = YES;
+
+    // hide hit test tolerance paths for RMShapes
+    for (RMAnnotation *annotation in _visibleAnnotations) {
+        // only handle RMShape layers
+        if (!annotation.layer || ![annotation.layer isKindOfClass:RMShape.class]) {
+            continue;
+        }
+        RMShape *shape = (RMShape *)annotation.layer;
+        if (shape.usesHitTestTolerance && shape.hitTestAreaVisible) {
+            [shape hideHitTestArea];
+            [_annotationsShowingHitTestArea addObject:annotation];
+        }
+    }
 }
 
 - (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(float)scale
@@ -1348,8 +1364,13 @@
         RMShape *shape = (RMShape *)annotation.layer;
         if (shape.usesHitTestTolerance) {
             [shape updateHitTestPath];
+
+            if ([_annotationsShowingHitTestArea containsObject:annotation]) {
+                [shape showHitTestArea];
+            }
         }
     }
+    [_annotationsShowingHitTestArea removeAllObjects];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
