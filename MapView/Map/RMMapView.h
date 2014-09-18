@@ -167,6 +167,15 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 /** The view used for map overlays like annotations */
 @property (nonatomic, assign, readonly) RMMapOverlayView *overlayView;
 
+/** Gesture Recognizer used to handle single taps */
+@property (nonatomic, assign, readonly) UITapGestureRecognizer *singleTapRecognizer;
+
+/** Gesture Recognizer used to handle double taps */
+@property (nonatomic, assign, readonly) UITapGestureRecognizer *doubleTapRecognizer;
+
+/** Gesture Recognizer used to handle long presses */
+@property (nonatomic, assign, readonly) UILongPressGestureRecognizer *longPressRecognizer;
+
 /** A Boolean value indicating whether to draw tile borders and z/x/y numbers on tile images for debugging purposes. Defaults to `NO`. */
 @property (nonatomic, assign) BOOL debugTiles;
 

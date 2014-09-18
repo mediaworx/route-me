@@ -34,6 +34,9 @@
 
 - (void)setContentOffset:(CGPoint)contentOffset
 {
+    if (isnan(contentOffset.x) || isnan(contentOffset.y)) {
+        return;
+    }
     if (self.mapScrollViewDelegate)
         [self.mapScrollViewDelegate scrollView:self correctedContentOffset:&contentOffset];
 

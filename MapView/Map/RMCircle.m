@@ -47,6 +47,7 @@
 @synthesize lineColor;
 @synthesize fillColor;
 @synthesize radiusInMeters;
+@synthesize radiusInPixels;
 @synthesize lineWidthInPixels;
 
 - (id)initWithView:(RMMapView *)aMapView radiusInMeters:(CGFloat)newRadiusInMeters
@@ -54,11 +55,35 @@
     if (!(self = [super init]))
         return nil;
 
+    radiusInMeters = newRadiusInMeters;
+    radiusInPixels = 0;
+
+    [self initializeWithMapView:aMapView];
+
+    return self;
+}
+
+- (id)initWithView:(RMMapView *)aMapView radiusInPixels:(CGFloat)newRadiusInPixels
+{
+    if (!(self = [super init]))
+        return nil;
+
+    radiusInMeters = 0;
+    radiusInPixels = newRadiusInPixels;
+
+    [self initializeWithMapView:aMapView];
+
+    return self;
+}
+
+
+- (void)initializeWithMapView:(RMMapView *)aMapView
+{
     shapeLayer = [CAShapeLayer new];
     [self addSublayer:shapeLayer];
 
     mapView = aMapView;
-    radiusInMeters = newRadiusInMeters;
+
 
     lineWidthInPixels = kDefaultLineWidth;
     lineColor = kDefaultLineColor;
@@ -71,9 +96,8 @@
     [self updateCirclePathAnimated:NO];
 
     self.masksToBounds = NO;
-
-    return self;
 }
+
 
 - (void)dealloc
 {
@@ -94,7 +118,8 @@
     CGMutablePathRef newPath = CGPathCreateMutable();
 
     CGFloat latRadians = [[mapView projection] projectedPointToCoordinate:projectedLocation].latitude * M_PI / 180.0f;
-    CGFloat pixelRadius = radiusInMeters / cos(latRadians) / [mapView metersPerPixel];
+
+    CGFloat pixelRadius = radiusInPixels > 0 ? radiusInPixels : (float)(radiusInMeters / cos(latRadians) / [mapView metersPerPixel]);
     //	DLog(@"Pixel Radius: %f", pixelRadius);
 
     CGRect rectangle = CGRectMake(self.position.x - pixelRadius,
@@ -162,6 +187,12 @@
 - (void)setRadiusInMeters:(CGFloat)newRadiusInMeters
 {
     radiusInMeters = newRadiusInMeters;
+    [self updateCirclePathAnimated:NO];
+}
+
+- (void)setRadiusInPixels:(CGFloat)newRadiusInPixels
+{
+    radiusInPixels = newRadiusInPixels;
     [self updateCirclePathAnimated:NO];
 }
 

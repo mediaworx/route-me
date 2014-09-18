@@ -308,6 +308,10 @@
 
 - (void)addCurveToProjectedPoint:(RMProjectedPoint)point controlPoint1:(RMProjectedPoint)controlPoint1 controlPoint2:(RMProjectedPoint)controlPoint2 withDrawing:(BOOL)isDrawing
 {
+    if (isnan(point.x) || isnan(point.y) || isinf(point.x) || isinf(point.y)) {
+        RMLog(@"RMShape.addCurveToProjectedPoint 1: Error adding projected point %.5f, %.5f", point.x, point.y);
+        return;
+    }
     [_points addObject:[[CLLocation alloc] initWithLatitude:[_mapView projectedPointToCoordinate:point].latitude longitude:[_mapView projectedPointToCoordinate:point].longitude]];
 
     if (_isFirstPoint)
@@ -470,9 +474,6 @@
 
 - (BOOL)shapeContainsPoint:(CGPoint)point
 {
-    if (!CGRectContainsPoint(self.frame, point)) {
-        return NO;
-    }
     CGPoint testPoint = [self convertPoint:point fromLayer:self.mapView.layer];
     if (_hitTestTargetPath) {
         return [_hitTestTargetPath containsPoint:testPoint];
@@ -517,6 +518,7 @@
     }
 
     _hitTestTargetPath = [UIBezierPath bezierPathWithCGPath:targetPath];
+    _hitTestLayer.path = _hitTestTargetPath.CGPath;
     CGPathRelease(targetPath);
 }
 
@@ -594,7 +596,7 @@
     if (_shapeLayer.strokeColor != aLineColor.CGColor)
     {
         _shapeLayer.strokeColor = aLineColor.CGColor;
-        _hitTestLayer.fillColor = CGColorCreateCopyWithAlpha(_shapeLayer.strokeColor, 0.3);
+        _hitTestLayer.fillColor = CGColorCreateCopyWithAlpha(_shapeLayer.strokeColor, 0.2);
         [self setNeedsDisplay];
     }
 }

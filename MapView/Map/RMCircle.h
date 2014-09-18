@@ -40,6 +40,7 @@
 	UIColor *lineColor;
 	UIColor *fillColor;
 	CGFloat radiusInMeters;
+    CGFloat radiusInPixels;
 	CGFloat lineWidthInPixels;
 	BOOL scaleLineWidth;
 
@@ -57,8 +58,18 @@
 /** The circle's fill color. Defaults to blue. */
 @property (nonatomic, retain) UIColor *fillColor;
 
-/** The radius of the circle in projected meters. Regardless of map zoom, the circle will change visible size to continously represent this radius on the map. */
+/**
+* The pixelRadius of the circle in projected meters. Regardless of map zoom, the circle will change visible size to continously represent this pixelRadius on the map.
+* If you want a circle that stays the same size, use radiusInPixels. If both radiusInMeters and radiusInPixels are set, radiusInPixels wins.
+*/
 @property (nonatomic, assign) CGFloat radiusInMeters;
+
+/**
+* The pixelRadius of the circle in Pixels. The circle will always stay the same pixel size, regardless of map zoom. If you want
+* a circle that gets smaller or bigger when zooming, use radiusInMeters. If both radiusInMeters and radiusInPixels are set,
+* radiusInPixels wins.
+*/
+@property (nonatomic, assign) CGFloat radiusInPixels;
 
 /** The circle's line width. Defaults to 10.0. */
 @property (nonatomic, assign) CGFloat lineWidthInPixels;
@@ -67,7 +78,7 @@
 
 /** Initializes and returns a newly allocated RMCircle for the specified map view.
 *   @param aMapView The map view the shape should be drawn on.
-*   @param newRadiusInMeters The radius of the circle object in projected meters. Regardless of map zoom, the circle will change visible size to continously represent this radius on the map. */
+*   @param newRadiusInMeters The pixelRadius of the circle object in projected meters. Regardless of map zoom, the circle will change visible size to continously represent this pixelRadius on the map. */
 - (id)initWithView:(RMMapView *)aMapView radiusInMeters:(CGFloat)newRadiusInMeters;
 
 @end

@@ -146,6 +146,10 @@
     RMMapOverlayView *_overlayView;
     UIView *_tiledLayersSuperview;
 
+    UITapGestureRecognizer *_singleTapRecognizer;
+    UITapGestureRecognizer *_doubleTapRecognizer;
+    UILongPressGestureRecognizer *_longPressRecognizer;
+
     RMProjection *_projection;
     RMFractalTileProjection *_mercatorToTileProjection;
     RMTileSourcesContainer *_tileSourcesContainer;
@@ -250,6 +254,9 @@
     _scrollingColor = nil;
     _zoomingColor = nil;
     _overlayView = nil;
+    _singleTapRecognizer = nil;
+    _doubleTapRecognizer = nil;
+    _longPressRecognizer = nil;
 
     _screenScale = [UIScreen mainScreen].scale;
 
@@ -427,6 +434,9 @@
     [_scrollingColor release]; _scrollingColor = nil;
     [_zoomingColor release]; _zoomingColor = nil;
     [_overlayView release]; _overlayView = nil;
+    _singleTapRecognizer = nil;  // Recognizers are autoreleased
+    _doubleTapRecognizer = nil;
+    _longPressRecognizer = nil;
     [_tileSourcesContainer cancelAllDownloads]; [_tileSourcesContainer release]; _tileSourcesContainer = nil;
     [_projection release]; _projection = nil;
     [_mercatorToTileProjection release]; _mercatorToTileProjection = nil;
@@ -1234,22 +1244,22 @@
     // add gesture recognizers
 
     // one finger taps
-    UITapGestureRecognizer *doubleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)] autorelease];
-    doubleTapRecognizer.numberOfTouchesRequired = 1;
-    doubleTapRecognizer.numberOfTapsRequired = 2;
-    doubleTapRecognizer.delegate = self;
+    _doubleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)] autorelease];
+    _doubleTapRecognizer.numberOfTouchesRequired = 1;
+    _doubleTapRecognizer.numberOfTapsRequired = 2;
+    _doubleTapRecognizer.delegate = self;
 
-    UITapGestureRecognizer *singleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)] autorelease];
-    singleTapRecognizer.numberOfTouchesRequired = 1;
-    [singleTapRecognizer requireGestureRecognizerToFail:doubleTapRecognizer];
-    singleTapRecognizer.delegate = self;
+    _singleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)] autorelease];
+    _singleTapRecognizer.numberOfTouchesRequired = 1;
+    [_singleTapRecognizer requireGestureRecognizerToFail:_doubleTapRecognizer];
+    _singleTapRecognizer.delegate = self;
 
-    UILongPressGestureRecognizer *longPressRecognizer = [[[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)] autorelease];
-    longPressRecognizer.delegate = self;
+    _longPressRecognizer = [[[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)] autorelease];
+    _longPressRecognizer.delegate = self;
 
-    [self addGestureRecognizer:singleTapRecognizer];
-    [self addGestureRecognizer:doubleTapRecognizer];
-    [self addGestureRecognizer:longPressRecognizer];
+    [self addGestureRecognizer:_singleTapRecognizer];
+    [self addGestureRecognizer:_doubleTapRecognizer];
+    [self addGestureRecognizer:_longPressRecognizer];
 
     // two finger taps
     UITapGestureRecognizer *twoFingerSingleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTwoFingerSingleTap:)] autorelease];
@@ -2298,6 +2308,21 @@
 - (RMMapOverlayView *)overlayView
 {
     return [[_overlayView retain] autorelease];
+}
+
+- (UITapGestureRecognizer *)singleTapRecognizer
+{
+    return [[_singleTapRecognizer retain] autorelease];
+}
+
+- (UITapGestureRecognizer *)doubleTapRecognizer
+{
+    return [[_doubleTapRecognizer retain] autorelease];
+}
+
+- (UILongPressGestureRecognizer *)longPressRecognizer
+{
+    return [[_longPressRecognizer retain] autorelease];
 }
 
 - (double)metersPerPixel
