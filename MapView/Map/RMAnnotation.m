@@ -33,6 +33,7 @@
 #import "RMMapView.h"
 #import "RMMapLayer.h"
 #import "RMQuadTree.h"
+#import "RMCoordinate.h"
 
 @implementation RMAnnotation
 
@@ -228,6 +229,32 @@
 		min.latitude  = fmin(currentLatitude, min.latitude);
 		min.longitude = fmin(currentLongitude, min.longitude);
 	}
+
+    [self setBoundingBoxCoordinatesSouthWest:min northEast:max];
+}
+
+- (void)setBoundingBoxFromRMCoordinates:(NSArray *)coordinates
+{
+    CLLocationCoordinate2D min, max;
+    min.latitude = kRMMaxLatitude; min.longitude = kRMMaxLongitude;
+    max.latitude = kRMMinLatitude; max.longitude = kRMMinLongitude;
+
+    CLLocationDegrees currentLatitude, currentLongitude;
+
+    for (RMCoordinate *currentCoordinate in coordinates)
+    {
+        currentLatitude = currentCoordinate.latitude;
+        currentLongitude = currentCoordinate.longitude;
+
+        // POIs outside of the world...
+        if (currentLatitude < kRMMinLatitude || currentLatitude > kRMMaxLatitude || currentLongitude < kRMMinLongitude || currentLongitude > kRMMaxLongitude)
+            continue;
+
+        max.latitude  = fmax(currentLatitude, max.latitude);
+        max.longitude = fmax(currentLongitude, max.longitude);
+        min.latitude  = fmin(currentLatitude, min.latitude);
+        min.longitude = fmin(currentLongitude, min.longitude);
+    }
 
     [self setBoundingBoxCoordinatesSouthWest:min northEast:max];
 }

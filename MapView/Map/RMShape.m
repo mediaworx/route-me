@@ -29,6 +29,7 @@
 #import "RMProjection.h"
 #import "RMMapView.h"
 #import "RMAnnotation.h"
+#import "RMCoordinate.h"
 
 @interface RMShape()
 @property (nonatomic, strong) CAShapeLayer *shapeLayer;
@@ -298,8 +299,8 @@
 
     if (self.annotation && [_points count])
     {
-        self.annotation.coordinate = ((CLLocation *)[_points objectAtIndex:0]).coordinate;
-        [self.annotation setBoundingBoxFromLocations:_points];
+        self.annotation.coordinate = ((RMCoordinate *)[_points objectAtIndex:0]).locationCoordinate2D;
+        [self.annotation setBoundingBoxFromRMCoordinates:_points];
     }
 }
 
@@ -312,7 +313,8 @@
         RMLog(@"RMShape.addCurveToProjectedPoint 1: Error adding projected point %.5f, %.5f", point.x, point.y);
         return;
     }
-    [_points addObject:[[CLLocation alloc] initWithLatitude:[_mapView projectedPointToCoordinate:point].latitude longitude:[_mapView projectedPointToCoordinate:point].longitude]];
+    CLLocationCoordinate2D coordinate = [_mapView projectedPointToCoordinate:point];
+    [_points addObject:[RMCoordinate coordinateWithCLLocationCoordinate2D:coordinate]];
 
     if (_isFirstPoint)
     {
@@ -549,7 +551,8 @@
 - (void)closePath
 {
     if ([_points count]) {
-        [self addLineToCoordinate:((CLLocation *)[_points objectAtIndex:0]).coordinate];
+        CLLocationCoordinate2D locationCoordinate2D = ((RMCoordinate *)[_points objectAtIndex:0]).locationCoordinate2D;
+        [self addLineToCoordinate:locationCoordinate2D];
         _closed = YES;
         _hitTestTargetPath = _scaledPath;
         _usesHitTestTolerance = NO;

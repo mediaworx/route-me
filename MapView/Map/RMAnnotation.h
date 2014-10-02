@@ -123,6 +123,7 @@
 
 - (void)setBoundingBoxCoordinatesSouthWest:(CLLocationCoordinate2D)southWest northEast:(CLLocationCoordinate2D)northEast;
 - (void)setBoundingBoxFromLocations:(NSArray *)locations;
+- (void)setBoundingBoxFromRMCoordinates:(NSArray *)coordinates;
 
 #pragma mark -
 

@@ -51,6 +51,8 @@
 		444FEC1F17A5BF7100F3798C /* RMWMS.m in Sources */ = {isa = PBXBuildFile; fileRef = 444FEC1B17A5BF7100F3798C /* RMWMS.m */; };
 		444FEC2017A5BF7100F3798C /* RMWMSSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 444FEC1C17A5BF7100F3798C /* RMWMSSource.h */; };
 		444FEC2117A5BF7100F3798C /* RMWMSSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 444FEC1D17A5BF7100F3798C /* RMWMSSource.m */; };
+		4FE6984072400FCAC372C1B9 /* RMCoordinate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FE6936577A7B41A5D2305CF /* RMCoordinate.h */; };
+		4FE69B351315456D202B3C3A /* RMCoordinate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE69AE26CB08C61ED578426 /* RMCoordinate.m */; };
 		96492C400FA8AD3400EBA6D2 /* RMGlobalConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 96492C3F0FA8AD3400EBA6D2 /* RMGlobalConstants.h */; };
 		B1EB26C610B5D8E6009F8658 /* RMNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = B1EB26C510B5D8E6009F8658 /* RMNotifications.h */; };
 		B8474BA40EB40094006A0BC1 /* RMDatabaseCache.h in Headers */ = {isa = PBXBuildFile; fileRef = B8474B980EB40094006A0BC1 /* RMDatabaseCache.h */; };
@@ -187,6 +189,8 @@
 		444FEC1B17A5BF7100F3798C /* RMWMS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMWMS.m; sourceTree = "<group>"; };
 		444FEC1C17A5BF7100F3798C /* RMWMSSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMWMSSource.h; sourceTree = "<group>"; };
 		444FEC1D17A5BF7100F3798C /* RMWMSSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMWMSSource.m; sourceTree = "<group>"; };
+		4FE6936577A7B41A5D2305CF /* RMCoordinate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMCoordinate.h; sourceTree = "<group>"; };
+		4FE69AE26CB08C61ED578426 /* RMCoordinate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMCoordinate.m; sourceTree = "<group>"; };
 		96492C3F0FA8AD3400EBA6D2 /* RMGlobalConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMGlobalConstants.h; sourceTree = "<group>"; };
 		B1EB26C510B5D8E6009F8658 /* RMNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMNotifications.h; sourceTree = "<group>"; };
 		B83E64B60E80E73F001663B6 /* RMPixel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMPixel.h; sourceTree = "<group>"; };
@@ -477,6 +481,8 @@
 				B83E64D70E80E73F001663B6 /* RMTile.c */,
 				B83E64B60E80E73F001663B6 /* RMPixel.h */,
 				B83E64B70E80E73F001663B6 /* RMPixel.c */,
+				4FE69AE26CB08C61ED578426 /* RMCoordinate.m */,
+				4FE6936577A7B41A5D2305CF /* RMCoordinate.h */,
 			);
 			name = "Coordinate Systems";
 			sourceTree = "<group>";
@@ -612,6 +618,7 @@
 				DD6B651B16A9ECD8007D1CBA /* MapView_Prefix.pch in Headers */,
 				444FEC1E17A5BF7100F3798C /* RMWMS.h in Headers */,
 				444FEC2017A5BF7100F3798C /* RMWMSSource.h in Headers */,
+				4FE6984072400FCAC372C1B9 /* RMCoordinate.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -754,6 +761,7 @@
 				DD1E3C6F161F954F004FC649 /* SMCalloutView.m in Sources */,
 				444FEC1F17A5BF7100F3798C /* RMWMS.m in Sources */,
 				444FEC2117A5BF7100F3798C /* RMWMSSource.m in Sources */,
+				4FE69B351315456D202B3C3A /* RMCoordinate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
