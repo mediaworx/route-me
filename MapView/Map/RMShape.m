@@ -494,15 +494,8 @@
 - (void)prepareShapeHitTestWithTolerance:(float)tolerance
 {
     _hitTestTolerance = tolerance;
-
-    if (!_closed) {
-        [self updateHitTestPath];
-        _usesHitTestTolerance = YES;
-    }
-    else {
-        _hitTestTargetPath = _scaledPath;
-        _usesHitTestTolerance = NO;
-    }
+    [self updateHitTestPath];
+    _usesHitTestTolerance = YES;
 }
 
 - (void)updateHitTestPath
@@ -554,8 +547,6 @@
         CLLocationCoordinate2D locationCoordinate2D = ((RMCoordinate *)[_points objectAtIndex:0]).locationCoordinate2D;
         [self addLineToCoordinate:locationCoordinate2D];
         _closed = YES;
-        _hitTestTargetPath = _scaledPath;
-        _usesHitTestTolerance = NO;
     }
 }
 
