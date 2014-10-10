@@ -653,6 +653,11 @@
     _shapeLayer.fillRule = fillRule;
 }
 
+- (void)setLineDashLengths:(NSArray *)lineDashLengths {
+    _lineDashLengths = lineDashLengths;
+    _shapeLayer.lineDashPattern = lineDashLengths;
+}
+
 - (CGFloat)lineDashPhase
 {
     return _shapeLayer.lineDashPhase;
