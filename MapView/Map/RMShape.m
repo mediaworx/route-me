@@ -478,7 +478,7 @@
 {
     CGPoint testPoint = [self convertPoint:point fromLayer:self.mapView.layer];
     if (_hitTestTargetPath) {
-        return [_hitTestTargetPath containsPoint:testPoint];
+        return [_hitTestTargetPath containsPoint:testPoint] || CGPathContainsPoint(_shapeLayer.path, nil, testPoint, [_shapeLayer.fillRule isEqualToString:kCAFillRuleEvenOdd]);
     }
     return CGPathContainsPoint(_shapeLayer.path, nil, testPoint, [_shapeLayer.fillRule isEqualToString:kCAFillRuleEvenOdd]);
 }
