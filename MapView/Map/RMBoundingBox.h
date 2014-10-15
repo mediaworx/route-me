@@ -16,6 +16,7 @@
 + (instancetype)boundingBoxWithSouthWest:(CLLocationCoordinate2D)southWest northEast:(CLLocationCoordinate2D)northEast;
 
 - (void)addCoordinate:(CLLocationCoordinate2D)coordinate;
+- (void)addBoundingBox:(RMBoundingBox *)boundingBox;
 
 - (void)reset;
 

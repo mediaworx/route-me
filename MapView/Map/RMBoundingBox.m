@@ -62,7 +62,7 @@
         return;
     }
 
-    // this is known to have issues at the poles and at longitudes around 180/-180, but for GPSies it's ok for now
+    // this is known to have issues at the poles and at longitudes around 180/-180, but it's ok for now
     self.northEast = CLLocationCoordinate2DMake(
             fmax(self.northEast.latitude, latitude),
             fmax(self.northEast.longitude, longitude)
@@ -71,6 +71,12 @@
             fmin(self.southWest.latitude, latitude),
             fmin(self.southWest.longitude, longitude)
     );
+}
+
+- (void)addBoundingBox:(RMBoundingBox *)boundingBox
+{
+    [self addCoordinate:boundingBox.northEast];
+    [self addCoordinate:boundingBox.southWest];
 }
 
 - (void)reset
