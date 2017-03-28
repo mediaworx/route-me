@@ -232,6 +232,10 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 *   @param delta A `CGSize` by which to move the map center. */
 - (void)moveBy:(CGSize)delta;
 
+/** User events like panning or zooming may occur at the same time as programmatic events (e.g. in follow mode after
+ * GPS updates). If that happens it's possible to ask the map, if a programmatic event is in progress. */
+@property(nonatomic, assign) BOOL programmaticEventInProgress;
+
 #pragma mark - Zoom
 
 /** @name Zooming the Map */
