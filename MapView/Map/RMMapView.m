@@ -566,8 +566,6 @@
 - (void)registerMoveEventByUser:(BOOL)wasUserEvent
 {
     @synchronized (_userMoveDelegateQueue) {
-        NSLog(@"The map was moved. By user?: %s operation count %d", wasUserEvent ? "YES" : "NO", [_moveDelegateQueue operationCount]);
-
         if (!wasUserEvent) {
             self.programmaticEventInProgress = YES;
         }
@@ -585,23 +583,17 @@
         }
 
         if (execute) {
-            NSLog(@"Adding operation BEFORE MAP MOVE");
             dispatch_async(dispatch_get_main_queue(), ^(void) {
                 if (_delegateHasBeforeMapMove) {
                     [_delegate beforeMapMove:self byUser:wasUserEvent];
                 }
             });
         }
-        else {
-            NSLog(@"NOT adding operation BEFORE MAP MOVE");
-        }
 
         [_moveDelegateQueue setSuspended:YES];
         [_userMoveDelegateQueue setSuspended:YES];
 
-        NSLog(@"NOW the operation count is %d", [_moveDelegateQueue operationCount]);
         if (execute) {
-            NSLog(@"Adding operation AFTER MAP MOVE");
             [queue addOperationWithBlock:^(void) {
                 dispatch_async(dispatch_get_main_queue(), ^(void) {
                     if (_delegateHasAfterMapMove) {
@@ -612,9 +604,6 @@
                     }
                 });
             }];
-        }
-        else {
-            NSLog(@"NOT adding operation AFTER MAP MOVE");
         }
     }
 }
@@ -636,23 +625,17 @@
         }
 
         if (execute) {
-            NSLog(@"Adding operation BEFORE MAP ZOOM");
             dispatch_async(dispatch_get_main_queue(), ^(void) {
                 if (_delegateHasBeforeMapZoom) {
                     [_delegate beforeMapZoom:self byUser:wasUserEvent];
                 }
             });
         }
-        else {
-            NSLog(@"NOT adding operation BEFORE MAP ZOOM");
-        }
 
         [_zoomDelegateQueue setSuspended:YES];
         [_userZoomDelegateQueue setSuspended:YES];
 
-        NSLog(@"NOW the operation count is %d", [_moveDelegateQueue operationCount]);
         if (execute) {
-            NSLog(@"Adding operation AFTER MAP ZOOM");
             [queue addOperationWithBlock:^(void) {
                 dispatch_async(dispatch_get_main_queue(), ^(void) {
                     if (_delegateHasAfterMapZoom) {
@@ -660,9 +643,6 @@
                     }
                 });
             }];
-        }
-        else {
-            NSLog(@"NOT adding operation AFTER MAP ZOOM");
         }
     }
 }
@@ -1340,8 +1320,7 @@
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
     if (!decelerate) {
-        [_moveDelegateQueue setSuspended:NO];
-        [_userMoveDelegateQueue setSuspended:NO];
+        [self scrollingDidEnd];
     }
 }
 
@@ -1354,15 +1333,20 @@
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    [_moveDelegateQueue setSuspended:NO];
-    [_userMoveDelegateQueue setSuspended:NO];
+    [self scrollingDidEnd];
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
+    [self scrollingDidEnd];
+}
+
+- (void)scrollingDidEnd
+{
     [_moveDelegateQueue setSuspended:NO];
     [_userMoveDelegateQueue setSuspended:NO];
 }
+
 
 - (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view
 {
