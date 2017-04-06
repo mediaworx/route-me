@@ -51,6 +51,8 @@
 
 #import "SMCalloutView.h"
 
+#define TRACE_MAP_EVENTS NO
+
 #pragma mark --- begin constants ----
 
 #define kDefaultZoomRectPixelBuffer 150.0
@@ -115,6 +117,7 @@
 
     BOOL _delegateHasBeforeMapMove;
     BOOL _delegateHasAfterMapMove;
+    BOOL _delegateHasMapDidNotMove;
     BOOL _delegateHasBeforeMapZoom;
     BOOL _delegateHasAfterMapZoom;
     BOOL _delegateHasMapViewRegionDidChange;
@@ -524,6 +527,7 @@
 
     _delegateHasBeforeMapMove = [_delegate respondsToSelector:@selector(beforeMapMove:byUser:)];
     _delegateHasAfterMapMove = [_delegate respondsToSelector:@selector(afterMapMove:byUser:)];
+    _delegateHasMapDidNotMove = [_delegate respondsToSelector:@selector(mapDidNotMove:)];
 
     _delegateHasBeforeMapZoom = [_delegate respondsToSelector:@selector(beforeMapZoom:byUser:)];
     _delegateHasAfterMapZoom = [_delegate respondsToSelector:@selector(afterMapZoom:byUser:)];
@@ -604,6 +608,10 @@
                     }
                 });
             }];
+        }
+
+        if (TRACE_MAP_EVENTS) {
+            NSLog(@"---- END OF registerMoveEventByUser ----");
         }
     }
 }
@@ -826,7 +834,9 @@
 
 - (void)setCenterProjectedPoint:(RMProjectedPoint)centerProjectedPoint animated:(BOOL)animated
 {
-    [self registerMoveEventByUser:NO];
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- setCenterProjectedPoint ----");
+    }
 
 //    RMLog(@"Current contentSize: {%.0f,%.0f}, zoom: %f", mapScrollView.contentSize.width, mapScrollView.contentSize.height, self.zoom);
 
@@ -835,31 +845,69 @@
     normalizedProjectedPoint.x = centerProjectedPoint.x + fabs(planetBounds.origin.x);
     normalizedProjectedPoint.y = centerProjectedPoint.y + fabs(planetBounds.origin.y);
 
-    [_mapScrollView setContentOffset:CGPointMake(normalizedProjectedPoint.x / _metersPerPixel - _mapScrollView.bounds.size.width / 2.0, _mapScrollView.contentSize.height - ((normalizedProjectedPoint.y / _metersPerPixel) + _mapScrollView.bounds.size.height / 2.0)) animated:animated];
+    CGPoint targetPoint = CGPointMake(
+            (CGFloat)(normalizedProjectedPoint.x / _metersPerPixel - _mapScrollView.bounds.size.width / 2.0),
+            (CGFloat)(_mapScrollView.contentSize.height - ((normalizedProjectedPoint.y / _metersPerPixel) + _mapScrollView.bounds.size.height / 2.0))
+    );
+
+    if (![self mapIsAtContentOffset:targetPoint]) {
+        [self registerMoveEventByUser:NO];
+
+
+        [_mapScrollView setContentOffset:targetPoint animated:animated];
 
 //    RMLog(@"setMapCenterProjectedPoint: {%f,%f} -> {%.0f,%.0f}", centerProjectedPoint.x, centerProjectedPoint.y, mapScrollView.contentOffset.x, mapScrollView.contentOffset.y);
 
-    if (!animated) {
-        [_moveDelegateQueue setSuspended:NO];
-        [_userMoveDelegateQueue setSuspended:NO];
-    }
+        if (!animated) {
+            [_moveDelegateQueue setSuspended:NO];
+            [_userMoveDelegateQueue setSuspended:NO];
+        }
 
-    [self correctPositionOfAllAnnotations];
+        [self correctPositionOfAllAnnotations];
+    }
+    else if (_delegateHasMapDidNotMove) {
+        [self.delegate mapDidNotMove:self];
+    }
+}
+
+- (BOOL)mapIsAtContentOffset:(CGPoint)targetPoint
+{
+    CGPoint roundedTarget = CGPointMake(
+        roundf(targetPoint.x * 2)/2.f,
+        roundf(targetPoint.y * 2)/2.f
+    );
+    CGPoint currentOffset = _mapScrollView.contentOffset;
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"- targetPoint   x:%.2f y:%.2f", targetPoint.x, targetPoint.y);
+        NSLog(@"- roundedTarget x:%.2f y:%.2f", roundedTarget.x, roundedTarget.y);
+        NSLog(@"- currentOffset x:%.2f y:%.2f", currentOffset.x, currentOffset.y);
+
+    }
+    return (
+            currentOffset.x == roundedTarget.x
+            &&
+            currentOffset.y == roundedTarget.y
+    );
 }
 
 // ===
 
 - (void)moveBy:(CGSize)delta
 {
-    [self registerMoveEventByUser:NO];
+    CGPoint targetPoint = _mapScrollView.contentOffset;
+    targetPoint.x += delta.width;
+    targetPoint.y += delta.height;
+    if (![self mapIsAtContentOffset:targetPoint]) {
+        [self registerMoveEventByUser:NO];
 
-    CGPoint contentOffset = _mapScrollView.contentOffset;
-    contentOffset.x += delta.width;
-    contentOffset.y += delta.height;
-    _mapScrollView.contentOffset = contentOffset;
+        _mapScrollView.contentOffset = targetPoint;
 
-    [_moveDelegateQueue setSuspended:NO];
-    [_userMoveDelegateQueue setSuspended:NO];
+        [_moveDelegateQueue setSuspended:NO];
+        [_userMoveDelegateQueue setSuspended:NO];
+    }
+    else if (_delegateHasMapDidNotMove) {
+        [self.delegate mapDidNotMove:self];
+    }
 }
 
 #pragma mark -
@@ -1310,6 +1358,9 @@
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewWillBeginDragging ----");
+    }
     [self registerMoveEventByUser:YES];
 
     if (self.userTrackingMode != RMUserTrackingModeNone) {
@@ -1319,6 +1370,9 @@
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewDidEndDragging with%@ deceleration ----", decelerate ? @"" : @"out");
+    }
     if (!decelerate) {
         [self scrollingDidEnd];
     }
@@ -1326,6 +1380,9 @@
 
 - (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewWillBeginDecelerating ----");
+    }
     if (_decelerationMode == RMMapDecelerationOff) {
         [scrollView setContentOffset:scrollView.contentOffset animated:NO];
     }
@@ -1333,11 +1390,17 @@
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewDidEndDecelerating ----");
+    }
     [self scrollingDidEnd];
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewDidEndScrollingAnimation ----");
+    }
     [self scrollingDidEnd];
 }
 
@@ -1350,6 +1413,9 @@
 
 - (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewWillBeginZooming ----");
+    }
     [self registerZoomEventByUser:(scrollView.pinchGestureRecognizer.state == UIGestureRecognizerStateBegan)];
 
     if (self.zoomingColor) {
@@ -1373,6 +1439,9 @@
 
 - (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(float)scale
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewDidEndZooming ----");
+    }
     [_moveDelegateQueue setSuspended:NO];
     [_userMoveDelegateQueue setSuspended:NO];
     [_zoomDelegateQueue setSuspended:NO];
@@ -1405,10 +1474,16 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewDidScroll ----");
+    }
 }
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- scrollViewDidZoom ----");
+    }
     BOOL wasUserAction = (scrollView.pinchGestureRecognizer.state == UIGestureRecognizerStateChanged);
 
     [self registerZoomEventByUser:wasUserAction];
@@ -1428,6 +1503,9 @@
 
 - (void)scrollView:(RMMapScrollView *)aScrollView correctedContentOffset:(inout CGPoint *)aContentOffset
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- correctedContentOffset ----");
+    }
     if (!_constrainMovement) {
         return;
     }
@@ -1468,6 +1546,9 @@
 
 - (void)scrollView:(RMMapScrollView *)aScrollView correctedContentSize:(inout CGSize *)aContentSize
 {
+    if (TRACE_MAP_EVENTS) {
+        NSLog(@"---- correctedContentSize ----");
+    }
     if (!_constrainMovement) {
         return;
     }
@@ -1950,15 +2031,18 @@
 
 - (NSTimeInterval)calloutView:(SMCalloutView *)calloutView delayForRepositionWithSize:(CGSize)offset
 {
-    [self registerMoveEventByUser:NO];
+    CGPoint targetPoint = _mapScrollView.contentOffset;
 
-    CGPoint contentOffset = _mapScrollView.contentOffset;
+    targetPoint.x -= offset.width;
+    targetPoint.y -= offset.height;
 
-    contentOffset.x -= offset.width;
-    contentOffset.y -= offset.height;
-
-    [_mapScrollView setContentOffset:contentOffset animated:YES];
-
+    if (![self mapIsAtContentOffset:targetPoint]) {
+        [self registerMoveEventByUser:NO];
+        [_mapScrollView setContentOffset:targetPoint animated:YES];
+    }
+    else if (_delegateHasMapDidNotMove) {
+        [self.delegate mapDidNotMove:self];
+    }
     return kSMCalloutViewRepositionDelayForUIScrollView;
 }
 

@@ -78,7 +78,11 @@ typedef NS_ENUM(NSUInteger, RMUserTrackingMode) {
 *   @param wasUserAction A Boolean indicating whether the map move was in response to a user action or not. */
 - (void)afterMapMove:(RMMapView *)map byUser:(BOOL)wasUserAction;
 
-/** Tells the delegate when a map is about to zoom. 
+/** Tells the delegate when a map was programmatically asked to move to a target point, but the map was already at that position, so no move happened.
+*   @param map The map view that did not move. */
+- (void)mapDidNotMove:(RMMapView *)map;
+
+/** Tells the delegate when a map is about to zoom.
 *   @param map The map view that is about to zoom. 
 *   @param wasUserAction A Boolean indicating whether the map zoom is in response to a user action or not. */
 - (void)beforeMapZoom:(RMMapView *)map byUser:(BOOL)wasUserAction;

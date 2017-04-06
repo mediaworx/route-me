@@ -228,6 +228,8 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 *   @param animated Whether to animate the change to the map center. */
 - (void)setCenterProjectedPoint:(RMProjectedPoint)aPoint animated:(BOOL)animated;
 
+- (BOOL)mapIsAtContentOffset:(CGPoint)targetPoint;
+
 /** Move the map center by a given delta. 
 *   @param delta A `CGSize` by which to move the map center. */
 - (void)moveBy:(CGSize)delta;
