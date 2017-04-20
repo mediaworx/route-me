@@ -268,7 +268,7 @@
     _maxNumberOfTouchesForPanGestureHandling = 1;
 
     _boundingMask = RMMapMinWidthBound;
-    _adjustTilesForRetinaDisplay = NO;
+    _adjustTilesForRetinaDisplay = YES;
     _scaleMaxZoomLevelWhenDisplayingRetinaTiles = NO;
     _zoomRectPixelBuffer = kDefaultZoomRectPixelBuffer;
     _missingTilesDepth = 0;
