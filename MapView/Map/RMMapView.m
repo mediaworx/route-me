@@ -1270,7 +1270,7 @@
     _tiledLayersSuperview.userInteractionEnabled = NO;
 
     for (id <RMTileSource> tileSource in _tileSourcesContainer.tileSources) {
-        RMMapTiledLayerView *tiledLayerView = [[RMMapTiledLayerView alloc] initWithFrame:CGRectMake(0.0, 0.0, contentSize.width, contentSize.height) mapView:self forTileSource:tileSource];
+        RMMapTiledLayerView *tiledLayerView = [[[RMMapTiledLayerView alloc] initWithFrame:CGRectMake(0.0, 0.0, contentSize.width, contentSize.height) mapView:self forTileSource:tileSource] autorelease];
 
         ((CATiledLayer *) tiledLayerView.layer).tileSize = CGSizeMake(tileSideLength, tileSideLength);
 
@@ -2242,7 +2242,7 @@
         int tileSideLength = [_tileSourcesContainer tileSideLength];
         CGSize contentSize = CGSizeMake(tileSideLength, tileSideLength); // zoom level 1
 
-        RMMapTiledLayerView *tiledLayerView = [[RMMapTiledLayerView alloc] initWithFrame:CGRectMake(0.0, 0.0, contentSize.width, contentSize.height) mapView:self forTileSource:newTileSource];
+        RMMapTiledLayerView *tiledLayerView = [[[RMMapTiledLayerView alloc] initWithFrame:CGRectMake(0.0, 0.0, contentSize.width, contentSize.height) mapView:self forTileSource:newTileSource] autorelease];
 
         ((CATiledLayer *) tiledLayerView.layer).tileSize = CGSizeMake(tileSideLength, tileSideLength);
 
