@@ -247,7 +247,9 @@
                 UIGraphicsEndImageContext();
             }
 
-            [tileImage drawInRect:rect];
+            // [tileImage drawInRect:rect];
+            UIImage *image = [self horizontalFlipRotate: tileImage];
+            CGContextDrawImage(context, rect, image.CGImage);
         }
         else
         {
@@ -260,4 +262,23 @@
     [pool release]; pool = nil;
 }
 
+- (UIImage*) horizontalFlipRotate: (UIImage *) image {
+    UIGraphicsBeginImageContext(image.size);
+    CGContextRef current_context = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(current_context, image.size.width, 0);
+    CGContextScaleCTM(current_context, -1.0, 1.0);
+
+    CGContextTranslateCTM( current_context, 0.5f * image.size.width, 0.5f * image.size.height ) ;
+    CGContextRotateCTM( current_context, DegreesToRadians( 180 ) ) ;
+    CGContextTranslateCTM( current_context, -0.5f * image.size.width, -0.5f * image.size.height ) ;
+
+    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+
+    UIImage *flipped_img = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    return flipped_img;
+}
+
+static CGFloat DegreesToRadians(CGFloat degrees) {return degrees * M_PI / 180;}
 @end
